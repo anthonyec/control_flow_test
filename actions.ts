@@ -1,6 +1,20 @@
 const ACTIONS = {
-  conditional: () => {
+  conditional: (props, flowControl) => {
+    if (flowControl !== 'start') {
+      return { props: {}, controlFlowIndex: 1 };
+    }
 
+    if (Math.random() < 0.5) {
+      return {
+        props: {},
+        controlFlowIndex: 0
+      }
+    }
+
+    return {
+      props: {},
+      controlFlowIndex: 1
+    }
   },
   repeat_times: ({ currentIndex = 0, count = 0 }, flowControl) => {
     console.log('repeat_times ->', currentIndex, count);

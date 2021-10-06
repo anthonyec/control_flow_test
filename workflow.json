@@ -11,6 +11,23 @@
       }
     },
     {
+      "type": "conditional",
+      "flowControl": "start",
+      "group": "C",
+      "parameters": {}
+    },
+    {
+      "type": "log",
+      "parameters": {
+        "message": "CONDITION TRUE!"
+      }
+    },
+    {
+      "type": "conditional",
+      "flowControl": "end",
+      "group": "C"
+    },
+    {
       "type": "repeat_times",
       "flowControl": "start",
       "group": "A",
