@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "title": "Loop example",
+  "author": "John",
+  "config": {},
+  "actions": [
+    {
+      "type": "log",
+      "parameters": {
+        "message": "START"
+      }
+    },
+    {
+      "type": "repeat_times",
+      "flowControl": "start",
+      "group": "A",
+      "parameters": {
+        "count": 5
+      }
+    },
+    {
+      "type": "log",
+      "parameters": {
+        "message": "START"
+      }
+    },
+    {
+      "type": "log",
+      "parameters": {
+        "message": "LOOP"
+      }
+    },
+    {
+      "type": "repeat_times",
+      "flowControl": "start",
+      "group": "B",
+      "parameters": {
+        "count": 2
+      }
+    },
+    {
+      "type": "log",
+      "parameters": {
+        "message": "INNER LOOP"
+      }
+    },
+    {
+      "type": "repeat_times",
+      "flowControl": "end",
+      "group": "B"
+    },
+    {
+      "type": "repeat_times",
+      "flowControl": "end",
+      "group": "A"
+    },
+    {
+      "type": "log",
+      "parameters": {
+        "message": "END"
+      }
+    }
+  ]
+}
