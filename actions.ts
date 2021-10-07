@@ -1,3 +1,7 @@
+function output(value) {
+  return { output: { value } };
+}
+
 const ACTIONS = {
   conditional: (props, flowControl) => {
     if (flowControl !== 'start') {
@@ -47,7 +51,25 @@ const ACTIONS = {
   log: ({ message = ''}) => {
     console.log('log ->', message);
     return {
-      props: {}
+      props: { message }
+    }
+  },
+  text: ({ text = ''}) => {
+    console.log('text ->', text);
+
+    return {
+      ...output(text),
+      props: { text }
+    }
+  },
+  get_element: ({ selector = '' }) => {
+    const element = document.querySelector(selector);
+
+    console.log('element', element);
+
+    return {
+      ...output(element),
+      props: { selector }
     }
   }
 }

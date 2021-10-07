@@ -5,6 +5,45 @@
   "config": {},
   "actions": [
     {
+      "type": "get_element",
+      "parameters": {
+        "selector": ".item"
+      }
+    },
+    {
+      "type": "text",
+      "uuid": "uid_1",
+      "parameters": {
+        "text": "Hello there!"
+      }
+    },
+    {
+      "type": "log",
+      "parameters": {
+        "message": {
+          "uuidOutput": "uid_1"
+        }
+      }
+    },
+    {
+      "type": "log",
+      "parameters": {
+        "message": "${uid_1}"
+      }
+    },
+    {
+      "type": "log",
+      "parameters": {
+        "message": {
+          "uuidOutputUsingRange": {
+            "uuid": "uid_1",
+            "string": "I want to say `%`, and that's it!",
+            "range": [15, 1]
+          }
+        }
+      }
+    },
+    {
       "type": "log",
       "parameters": {
         "message": "START"
