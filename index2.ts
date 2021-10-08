@@ -30,18 +30,34 @@ function getParameterizedInput(value: any, parametersTemplate: ActionParameters)
   return { [keys[0]]: value };
 }
 
+function getDefaultInputParameter(parametersTemplate?: ActionParameters) {
+  const foundParameterKey = Object.keys(parametersTemplate).find((parameterKey) => {
+    const parameter = parametersTemplate[parameterKey];
+    return parameter.defaultInput;
+  });
+
+  return parametersTemplate[foundParameterKey];
+}
+
 function runActionAtIndex(actions: SerializedAction[], index: number, input?: any) {
   const serializedAction = actions[index];
   const Action = getActionFromIdentifier(serializedAction.identifier);
 
   const actionInstance = new Action();
 
+  const defaultInput = getDefaultInputParameter(Action.parameters);
+
   if (!input) {
     const output = actionInstance.run(serializedAction.parameters);
     return output;
   }
 
-  const parameterizedInput = getParameterizedInput(input, Action.parameters);
+  // Only use output from a previous action if the current action accepts input
+  // from previous actions using `defaultInput`.
+  const parameterizedInput = defaultInput && !serializedAction.parameters ?
+    getParameterizedInput(input, Action.parameters) :
+    serializedAction.parameters;
+
   const output = actionInstance.run(parameterizedInput);
 
   return output;

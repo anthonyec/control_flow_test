@@ -11,6 +11,12 @@
       }
     },
     {
+      "identifier": "text_content",
+      "parameters": {
+        "text": "Wow"
+      }
+    },
+    {
       "identifier": "log"
     },
     {

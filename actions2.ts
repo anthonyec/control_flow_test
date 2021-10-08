@@ -4,7 +4,10 @@ enum ActionParameterType {
 }
 
 export interface ActionParameters {
-  [key: string]: { type: ActionParameterType };
+  [key: string]: {
+    type: ActionParameterType,
+    defaultInput?: boolean;
+  };
 }
 
 interface Action {
@@ -44,7 +47,7 @@ export class Log {
   static identifier = "log";
   static title = "Log";
   static parameters = {
-    message: { type: ActionParameterType.String }
+    message: { type: ActionParameterType.String, defaultInput: true }
   }
   static output = null
 
