@@ -32,7 +32,6 @@
     },
     {
       "identifier": "log",
-      "uuid": "u1",
       "parameters": {
         "message": "Inside deep conditional!"
       }

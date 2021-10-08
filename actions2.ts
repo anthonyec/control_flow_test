@@ -101,12 +101,11 @@ export class InsertCSS {
     css: { type: ActionParameterType.String },
   }
 
-  run({ css }) {
+  run({ css = '' }) {
     const element = document.createElement('style');
     element.innerHTML = css;
     window.document.body.appendChild(element);
-
-    return element;
+    return null;
   }
 }
 

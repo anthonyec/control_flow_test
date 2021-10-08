@@ -11,7 +11,7 @@ import {
   Popup
 } from './actions2';
 
-import workflow from './workflow_3.json';
+import workflow from './workflow_2.json';
 
 interface SerializedAction {
   identifier: string;
@@ -181,14 +181,15 @@ function createActionsIterator(actions: SerializedAction[]) {
 
   return () => {
     if (index > actions.length - 1) {
-      throw new Error('end');
+      return null;
     }
 
     if (iterations > 100) {
       throw new Error('infinite loop');
     }
 
-    const variableUUID = actions[index].uuid;
+    const currentAction = actions[index];
+    const variableUUID = currentAction.uuid;
     const results = runActionAtIndex(actions, index, iterationOutput);
 
     if (variableUUID) {
@@ -199,18 +200,29 @@ function createActionsIterator(actions: SerializedAction[]) {
     index = results.index;
     iterations += 1;
 
-    console.log(FAKE_VARIABLE_STORE.storage)
+    return { id: currentAction.identifier, index, scope: currentAction.runtime.scope, output: iterationOutput };
   };
 }
 
 const actionsMetaData = withRuntimeMetaData(workflowFile.actions);
 const next = createActionsIterator(actionsMetaData);
 
+let debugInfo = [];
+
 const interval = setInterval(() => {
   try {
-    next();
+    const iterationInfo = next();
+
+    if (!iterationInfo) {
+      console.log('Finished');
+      console.table(debugInfo);
+      clearInterval(interval);
+    }
+
+    debugInfo.push(iterationInfo);
   } catch (err) {
     console.log(err);
+    console.table(debugInfo);
     clearInterval(interval);
   }
 });
