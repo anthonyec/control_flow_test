@@ -48,6 +48,21 @@
       "parameters": {
         "message": { "uuid": "uuid_3" }
       }
+    },
+    {
+      "identifier": "get_element",
+      "parameters": {
+        "selector": ".box"
+      }
+    },
+    {
+      "identifier": "delete_element"
+    },
+    {
+      "identifier": "insert_css",
+      "parameters": {
+        "css": ".new-element { background: green; padding: 50px; }"
+      }
     }
   ]
 }
