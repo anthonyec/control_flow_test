@@ -35,12 +35,19 @@
     },
     {
       "identifier": "get_element",
+      "uuid": "uuid_3",
       "parameters": {
         "selector": { "uuid": "uuid_2" }
       }
     },
     {
       "identifier": "log"
+    },
+    {
+      "identifier": "log",
+      "parameters": {
+        "message": { "uuid": "uuid_3" }
+      }
     }
   ]
 }
