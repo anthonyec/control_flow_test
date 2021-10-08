@@ -8,9 +8,10 @@ import {
   InsertCSS,
   RepeatTimes,
   Conditional,
+  Popup
 } from './actions2';
 
-import workflow from './workflow_3.json';
+import workflow from './workflow_2.json';
 
 interface SerializedAction {
   identifier: string;
@@ -51,6 +52,7 @@ function getActionFromIdentifier(identifier: string) {
     InsertCSS,
     RepeatTimes,
     Conditional,
+    Popup
   ];
   return actions.find((action) => action.identifier === identifier);
 }

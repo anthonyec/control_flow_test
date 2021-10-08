@@ -59,9 +59,24 @@
       "identifier": "delete_element"
     },
     {
+      "identifier": "create_element",
+      "uuid": "uuid_4",
+      "parameters": {
+        "className": "new-element",
+        "text": { "uuid": "uuid_2" }
+      }
+    },
+    {
+      "identifier": "create_element",
+      "parameters": {
+        "className": "new-element",
+        "text": "An item!"
+      }
+    },
+    {
       "identifier": "insert_css",
       "parameters": {
-        "css": ".new-element { background: green; padding: 50px; }"
+        "css": ".new-element { background: green; padding: 50px; margin: 5px; }"
       }
     }
   ]

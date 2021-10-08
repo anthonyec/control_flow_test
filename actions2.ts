@@ -75,13 +75,17 @@ export class CreateElement {
   }
   static output = { type: 'DOMElement', name: 'Element' }
 
-  run({ className, id, text, type }) {
-    console.log('CreateElement');
-
+  run({ type, className, id, text = '' }) {
     const element = document.createElement('div');
 
-    element.classList.add(className);
-    element.id = id;
+    if (className) {
+      element.classList.add(className);
+    }
+
+    if (id) {
+      element.id = id;
+    }
+
     element.textContent = text;
 
     window.document.body.appendChild(element);
@@ -116,6 +120,24 @@ export class Log {
 
   run({ message = '' }) {
     console.log('LOG:', `"${message}"`);
+    return null;
+  }
+}
+
+export class Popup {
+  static identifier = "popup";
+  static title = "Popup";
+  static parameters = {
+    url: { type: ActionParameterType.String, defaultInput: true },
+    width: { type: ActionParameterType.Number },
+    height: { type: ActionParameterType.Number },
+    top: { type: ActionParameterType.Number },
+    left: { type: ActionParameterType.Number }
+  }
+  static output = null
+
+  run({ url = '', width = 500, height = 400, top = 100, left = 100 }) {
+    window.open(url, 'popup', `width=${width},height=${height},top=${top},left=${left}`);
     return null;
   }
 }
