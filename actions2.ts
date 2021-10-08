@@ -202,33 +202,43 @@ export class Conditional {
   }
 
   run({ a, b, comparator }) {
+    let output = false;
+
     if (comparator === '>') {
-      return a > b;
+      output = a > b;
     }
 
     if (comparator === '<') {
-      return a < b;
+      output = a < b;
     }
 
     if (comparator === '<=') {
-      return a <= b;
+      output = a <= b;
     }
 
     if (comparator === '>=') {
-      return a >= b;
+      output = a >= b;
     }
 
     if (comparator === '=') {
-      return a === b;
+      output = a === b;
     }
 
     if (comparator === 'contains') {
-      return a.includes(b);
+      output = a.includes(b);
     }
 
     if (comparator === 'doesNotContain') {
-      return !a.includes(b);
+      output = !a.includes(b);
     }
+
+    if (output) {
+      this.goto(0);
+    } else {
+      this.goto(1);
+    }
+
+    return output;
   }
 }
 

@@ -11,7 +11,7 @@ import {
   Popup
 } from './actions2';
 
-import workflow from './workflow_2.json';
+import workflow from './workflow_4.json';
 
 interface SerializedAction {
   identifier: string;
@@ -30,17 +30,10 @@ interface WorkflowFile {
   actions: SerializedAction[];
 }
 
-function getControlFlowGroup(actions: any, id: string) {
-  return actions
-    .map((action, index) => {
-      return {
-        index,
-        ...action,
-      };
-    })
-    .filter((action) => {
-      return action.group === id;
-    });
+function getControlFlowGroup(actions: SerializedAction[], id: string) {
+  return actions.filter((action) => {
+    return action.flowControlGroup === id;
+  });
 }
 
 function getActionFromIdentifier(identifier: string) {
@@ -167,9 +160,19 @@ function runActionAtIndex(
     ...inputWithDefaultParameterName,
   });
 
-  const output = actionInstance.run(runParameters);
+  // TODO: This feels crappy! But it's cleaner than before.
+  const flowControlGroupActions = getControlFlowGroup(actions, serializedAction.flowControlGroup);
 
-  return { output, index: index + 1 };
+  let flowControlGotoIndex;
+
+  actionInstance.goto = (index: number) => {
+    flowControlGotoIndex = flowControlGroupActions[index].runtime.index + 1;
+  };
+
+  const output = actionInstance.run(runParameters);
+  const nextIndex = flowControlGotoIndex ? flowControlGotoIndex : index + 1;
+
+  return { output, index: nextIndex };
 }
 
 const workflowFile = workflow as WorkflowFile;
