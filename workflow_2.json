@@ -6,6 +6,7 @@
   "actions": [
     {
       "identifier": "text_content",
+      "uuid": "uuid_1",
       "parameters": {
         "text": "Hello there!"
       }
@@ -17,7 +18,10 @@
       }
     },
     {
-      "identifier": "log"
+      "identifier": "log",
+      "parameters": {
+        "message": { "uuid": "uuid_1" }
+      }
     },
     {
       "identifier": "get_element",

@@ -52,7 +52,7 @@ export class Log {
   static output = null
 
   run({ message = 'default message' }) {
-    console.log(message);
+    console.log('LOG:', message);
     return null;
   }
 }
