@@ -18,6 +18,16 @@
       }
     },
     {
+      "identifier": "log"
+    },
+    {
+      "identifier": "text_content",
+      "uuid": "uuid_2",
+      "parameters": {
+        "text": ".item"
+      }
+    },
+    {
       "identifier": "log",
       "parameters": {
         "message": { "uuid": "uuid_1" }
@@ -26,7 +36,7 @@
     {
       "identifier": "get_element",
       "parameters": {
-        "selector": ".item"
+        "selector": { "uuid": "uuid_2" }
       }
     },
     {

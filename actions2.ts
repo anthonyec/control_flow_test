@@ -25,8 +25,13 @@ export class GetElement {
   static output = { type: 'DOMElement', name: 'Element' }
 
   run({ selector = '' }) {
-    const element = document.querySelector(selector);
-    return element;
+    try {
+      const element = document.querySelector(selector);
+      return element;
+    } catch (err) {
+      console.log('GetElement->Error', err);
+      return null;
+    }
   }
 }
 
@@ -51,7 +56,8 @@ export class Log {
   }
   static output = null
 
-  run({ message = 'default message' }) {
+  run({ message }) {
+    // TODO: Handle default input when message does not exist.
     console.log('LOG:', message);
     return null;
   }

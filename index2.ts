@@ -4,6 +4,7 @@ import workflow from './workflow_2.json';
 
 interface SerializedAction {
   identifier: string;
+  uuid?: string;
   parameters?: { [key: string]: any };
 }
 
@@ -64,8 +65,14 @@ function replaceWithVariableValues(
 }
 
 const FAKE_VARIABLE_STORE = {
+  storage: {},
+
+  setValue(key, value) {
+    this.storage[key] = value;
+  },
+
   getValue(key) {
-    return 'VARIABLE';
+    return this.storage[key];
   },
 };
 
@@ -76,6 +83,7 @@ function runActionAtIndex(
 ) {
   const serializedAction = actions[index];
   const serializedParameters = serializedAction.parameters
+    // TODO: Move outside this function?
     ? replaceWithVariableValues(
         serializedAction.parameters,
         FAKE_VARIABLE_STORE
@@ -114,7 +122,14 @@ function createActionsIterator(actions: SerializedAction[]) {
       throw new Error('end');
     }
 
+    const variableUUID = actions[index].uuid;
+
     iterationOutput = runActionAtIndex(actions, index, iterationOutput);
+
+    if (variableUUID) {
+      FAKE_VARIABLE_STORE.setValue(variableUUID, iterationOutput);
+    }
+
     index += 1;
   };
 }
