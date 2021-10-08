@@ -22,7 +22,24 @@
     },
     {
       "identifier": "conditional",
-      "flowControlGroup": "A",
+      "flowControl": "start",
+      "flowControlGroup": "B",
+      "parameters": {
+        "a": 1,
+        "comparator": "<",
+        "b": 2
+      }
+    },
+    {
+      "identifier": "log",
+      "uuid": "u1",
+      "parameters": {
+        "message": "Inside deep conditional!"
+      }
+    },
+    {
+      "identifier": "conditional",
+      "flowControlGroup": "B",
       "flowControl": "end"
     },
     {

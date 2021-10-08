@@ -11,14 +11,15 @@ import {
   Popup
 } from './actions2';
 
-import workflow from './workflow_2.json';
+import workflow from './workflow_3.json';
 
 interface SerializedAction {
   identifier: string;
   uuid?: string;
-  group?: string;
+  flowControlGroup?: string;
   flowControl?: string;
   parameters?: { [key: string]: any };
+  runtime?: { index: number; scope: number; }
 }
 
 interface WorkflowFile {
@@ -85,7 +86,7 @@ function replaceWithVariableValues(
   const parametersWithVariables = Object.keys(serializedParameters).reduce(
     (mem, parameterKey) => {
       const parameter = serializedParameters[parameterKey];
-      const variableName = parameter.uuid;
+      const variableName = parameter?.uuid;
       const value = variableName
         ? variableStore.getValue(variableName)
         : parameter;
@@ -103,17 +104,39 @@ function replaceWithVariableValues(
 const FAKE_VARIABLE_STORE = {
   storage: {},
 
-  setValue(key, value) {
-    this.storage[key] = value;
+  setValue(key, value, scope = 0) {
+    this.storage[key] = { value, scope };
   },
 
-  getValue(key) {
-    return this.storage[key];
+  getValue(key, scope = 0) {
+    return this.storage[key].value;
   },
 };
 
 function withVariables(parameters: object) {
   return replaceWithVariableValues(parameters, FAKE_VARIABLE_STORE);
+}
+
+// TODO: May not be needed?
+function withRuntimeMetaData(actions: SerializedAction[]) {
+  let groups = [];
+
+  return actions.map((action, index) => {
+    if ('flowControlGroup' in action) {
+      const index = groups.indexOf(action.flowControlGroup);
+
+      if (index === -1) {
+        groups.push(action.flowControlGroup);
+      } else {
+        groups.splice(index);
+      }
+    }
+
+    return {
+      ...action,
+      runtime: { index, scope: groups.length }
+    };
+  });
 }
 
 function runActionAtIndex(
@@ -169,17 +192,19 @@ function createActionsIterator(actions: SerializedAction[]) {
     const results = runActionAtIndex(actions, index, iterationOutput);
 
     if (variableUUID) {
-      FAKE_VARIABLE_STORE.setValue(variableUUID, results.output);
+      FAKE_VARIABLE_STORE.setValue(variableUUID, results.output, actions[index].runtime.scope);
     }
 
     iterationOutput = results.output;
     index = results.index;
     iterations += 1;
+
+    console.log(FAKE_VARIABLE_STORE.storage)
   };
 }
 
-// const actionsMetaData = withMetaData(workflowFile.actions);
-const next = createActionsIterator(workflowFile.actions);
+const actionsMetaData = withRuntimeMetaData(workflowFile.actions);
+const next = createActionsIterator(actionsMetaData);
 
 const interval = setInterval(() => {
   try {
