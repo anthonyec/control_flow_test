@@ -57,14 +57,6 @@ function getActionFromIdentifier(identifier: string) {
   return actions.find((action) => action.identifier === identifier);
 }
 
-function getParameterizedInput(
-  value: any,
-  parametersTemplate: ActionParameters
-) {
-  const keys = Object.keys(parametersTemplate);
-  return { [keys[0]]: value };
-}
-
 function getDefaultInputParameter(parametersTemplate?: ActionParameters) {
   const foundParameterKey = Object.keys(parametersTemplate).find(
     (parameterKey) => {
@@ -73,7 +65,7 @@ function getDefaultInputParameter(parametersTemplate?: ActionParameters) {
     }
   );
 
-  return parametersTemplate[foundParameterKey];
+  return { name: foundParameterKey, ...parametersTemplate[foundParameterKey] };
 }
 
 function getDefaultParameters(parametersTemplate?: ActionParameters) {
@@ -120,37 +112,39 @@ const FAKE_VARIABLE_STORE = {
   },
 };
 
+function withVariables(parameters: object) {
+  return replaceWithVariableValues(parameters, FAKE_VARIABLE_STORE);
+}
+
 function runActionAtIndex(
   actions: SerializedAction[],
   index: number,
   input?: any
 ) {
   const serializedAction = actions[index];
-  const serializedParameters = serializedAction.parameters
-    ? // TODO: Move outside this function?
-      replaceWithVariableValues(
-        serializedAction.parameters,
-        FAKE_VARIABLE_STORE
-      )
-    : null;
+  const serializedParameters = serializedAction.parameters;
 
   const Action = getActionFromIdentifier(serializedAction.identifier);
   const actionInstance = new Action();
   const defaultInput = getDefaultInputParameter(Action.parameters);
+
+  // TODO: Rename? Confusing with default input.
   const defaultParameters = getDefaultParameters(Action.parameters);
 
   // Only use output from a previous action if the current action accepts input
   // from previous actions using `defaultInput`.
-  const parameterizedInput =
-    defaultInput && !serializedParameters
-      ? getParameterizedInput(input, Action.parameters)
-      : {};
+  const shouldUseInput = defaultInput && !serializedParameters;
+  const inputWithDefaultParameterName = shouldUseInput ?
+    { [defaultInput.name]: input } :
+    {};
 
-  const output = actionInstance.run({
+  const runParameters = withVariables({
     ...defaultParameters,
     ...serializedParameters,
-    ...parameterizedInput,
+    ...inputWithDefaultParameterName,
   });
+
+  const output = actionInstance.run(runParameters);
 
   return { output, index: index + 1 };
 }
@@ -161,6 +155,7 @@ function createActionsIterator(actions: SerializedAction[]) {
   let index = 0;
   let iterations = 0;
   let iterationOutput = null;
+
   return () => {
     if (index > actions.length - 1) {
       throw new Error('end');
@@ -183,6 +178,7 @@ function createActionsIterator(actions: SerializedAction[]) {
   };
 }
 
+// const actionsMetaData = withMetaData(workflowFile.actions);
 const next = createActionsIterator(workflowFile.actions);
 
 const interval = setInterval(() => {
