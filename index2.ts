@@ -59,8 +59,6 @@ function replaceWithVariableValues(
     {}
   );
 
-  console.log('parametersWithVariables', parametersWithVariables);
-
   return parametersWithVariables;
 }
 
