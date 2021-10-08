@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "title": "Simple example",
+  "author": "",
+  "config": {},
+  "actions": [
+    {
+      "identifier": "text_content",
+      "parameters": {
+        "text": "Hello there!"
+      }
+    },
+    {
+      "identifier": "log"
+    },
+    {
+      "identifier": "get_element",
+      "parameters": {
+        "selector": ".item"
+      }
+    },
+    {
+      "identifier": "log"
+    }
+  ]
+}
