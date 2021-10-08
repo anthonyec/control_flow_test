@@ -1,4 +1,14 @@
-import { Log, TextContent, GetElement, ActionParameters, DeleteElement, CreateElement, InsertCSS, RepeatTimes } from './actions2';
+import {
+  Log,
+  TextContent,
+  GetElement,
+  ActionParameters,
+  DeleteElement,
+  CreateElement,
+  InsertCSS,
+  RepeatTimes,
+  Conditional,
+} from './actions2';
 
 import workflow from './workflow_3.json';
 
@@ -19,18 +29,29 @@ interface WorkflowFile {
 }
 
 function getControlFlowGroup(actions: any, id: string) {
-  return actions.map((action, index) => {
-    return {
-      index,
-      ...action
-    }
-  }).filter((action) => {
-    return action.group === id;
-  });
+  return actions
+    .map((action, index) => {
+      return {
+        index,
+        ...action,
+      };
+    })
+    .filter((action) => {
+      return action.group === id;
+    });
 }
 
 function getActionFromIdentifier(identifier: string) {
-  const actions = [Log, TextContent, GetElement, DeleteElement, CreateElement, InsertCSS, RepeatTimes];
+  const actions = [
+    Log,
+    TextContent,
+    GetElement,
+    DeleteElement,
+    CreateElement,
+    InsertCSS,
+    RepeatTimes,
+    Conditional,
+  ];
   return actions.find((action) => action.identifier === identifier);
 }
 
@@ -51,6 +72,16 @@ function getDefaultInputParameter(parametersTemplate?: ActionParameters) {
   );
 
   return parametersTemplate[foundParameterKey];
+}
+
+function getDefaultParameters(parametersTemplate?: ActionParameters) {
+  Object.keys(parametersTemplate).reduce((mem, key) => {
+    const parameter = parametersTemplate[key];
+
+    mem[key] = parameter.defaultValue ? parameter.defaultValue : null;
+
+    return mem;
+  }, {});
 }
 
 function replaceWithVariableValues(
@@ -94,8 +125,8 @@ function runActionAtIndex(
 ) {
   const serializedAction = actions[index];
   const serializedParameters = serializedAction.parameters
-    // TODO: Move outside this function?
-    ? replaceWithVariableValues(
+    ? // TODO: Move outside this function?
+      replaceWithVariableValues(
         serializedAction.parameters,
         FAKE_VARIABLE_STORE
       )
@@ -104,51 +135,20 @@ function runActionAtIndex(
   const Action = getActionFromIdentifier(serializedAction.identifier);
   const actionInstance = new Action();
   const defaultInput = getDefaultInputParameter(Action.parameters);
-
-  // TODO: BEGIN MESSY FLOW CONTROL.
-  if (serializedAction.flowControl) {
-    let nextIndex = index + 1;
-
-    actionInstance.setScopedVariable = (name, value) => {
-      console.log('serializedAction->set', name, value);
-      FAKE_VARIABLE_STORE.setValue(name, value);
-    };
-
-    actionInstance.getScopedVariable = (name) => {
-      const value = FAKE_VARIABLE_STORE.getValue(name);
-      console.log('serializedAction->get', value);
-      return value;
-    };
-
-    actionInstance.getFlowControlState = () => {
-      return serializedAction.flowControl;
-    };
-
-    actionInstance.gotoFlowControlIndex = (index) => {
-      const groupedActions = getControlFlowGroup(actions, serializedAction.group);
-      console.log('serializedAction->gotoFlowControlIndex', index, groupedActions[index].index + 1);
-      nextIndex = groupedActions[index].index + 1;
-    }
-
-    const output = actionInstance.run({ count: 5 });
-
-    return { output: {}, index: nextIndex };
-  }
-  // TODO: END MESSY FLOW CONTROl.
-
-  if (!input) {
-    const output = actionInstance.run(serializedParameters);
-    return { output, index: index + 1 };
-  }
+  const defaultParameters = getDefaultParameters(Action.parameters);
 
   // Only use output from a previous action if the current action accepts input
   // from previous actions using `defaultInput`.
   const parameterizedInput =
     defaultInput && !serializedParameters
       ? getParameterizedInput(input, Action.parameters)
-      : serializedParameters;
+      : {};
 
-  const output = actionInstance.run(parameterizedInput);
+  const output = actionInstance.run({
+    ...defaultParameters,
+    ...serializedParameters,
+    ...parameterizedInput,
+  });
 
   return { output, index: index + 1 };
 }
@@ -157,24 +157,27 @@ const workflowFile = workflow as WorkflowFile;
 
 function createActionsIterator(actions: SerializedAction[]) {
   let index = 0;
+  let iterations = 0;
   let iterationOutput = null;
-
   return () => {
     if (index > actions.length - 1) {
       throw new Error('end');
     }
 
+    if (iterations > 100) {
+      throw new Error('infinite loop');
+    }
+
     const variableUUID = actions[index].uuid;
     const results = runActionAtIndex(actions, index, iterationOutput);
-
-    console.log('results', results);
 
     if (variableUUID) {
       FAKE_VARIABLE_STORE.setValue(variableUUID, results.output);
     }
 
     iterationOutput = results.output;
-    index += 1;
+    index = results.index;
+    iterations += 1;
   };
 }
 

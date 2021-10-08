@@ -5,23 +5,31 @@
   "config": {},
   "actions": [
     {
-      "identifier": "repeat_times",
+      "identifier": "conditional",
       "flowControl": "start",
       "flowControlGroup": "A",
       "parameters": {
-        "count": 5
+        "a": 5,
+        "comparator": "<",
+        "b": 2
       }
     },
     {
       "identifier": "log",
       "parameters": {
-        "message": "Loopy loop"
+        "message": "Inside conditional!"
       }
     },
     {
-      "identifier": "repeat_times",
+      "identifier": "conditional",
       "flowControlGroup": "A",
       "flowControl": "end"
+    },
+    {
+      "identifier": "log",
+      "parameters": {
+        "message": "Done"
+      }
     }
   ]
 }

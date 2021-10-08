@@ -1,13 +1,14 @@
 enum ActionParameterType {
   String = 'string',
   DOMElement = 'DOMElement',
-  Number = 'DOMElement'
+  Number = 'DOMElement',
 }
 
 export interface ActionParameters {
   [key: string]: {
     type: ActionParameterType,
     defaultInput?: boolean;
+    defaultValue?: any;
   };
 }
 
@@ -113,33 +114,104 @@ export class Log {
   }
   static output = null
 
-  run({ message }) {
-    // TODO: Handle default input when message does not exist.
-    console.log('LOG:', message);
+  run({ message = '' }) {
+    console.log('LOG:', `"${message}"`);
     return null;
   }
 }
 
-class FlowControlAction {
-  gotoFlowControlIndex(index: number) {
-    console.log('gotoFlowControlIndex', index);
+// class FlowControlAction {
+//   gotoFlowControlIndex(index: number) {
+//     console.log('gotoFlowControlIndex', index);
+//   }
+
+//   getFlowControlState() {
+//     console.log('getFlowControlState');
+//   }
+
+//   setScopedVariable(name, value) {
+//     console.log('setScopedVariable');
+//   }
+
+//   getScopedVariable<T>(name, defaultValue): T  {
+//     console.log('getScopedVariable');
+//     return;
+//   }
+// }
+
+// export class RepeatTimes extends FlowControlAction {
+//   static identifier = "repeat_times";
+//   static title = "Repeat Times";
+//   static parameters = {
+//     count: { type: ActionParameterType.Number },
+//   }
+
+//   run({ count }) {
+//     const flowControlState = this.getFlowControlState();
+
+//     console.log('REPEAT_TIMES', flowControlState);
+
+//     if (flowControlState === 'start') {
+//       return this.setScopedVariable('currentIndex', 0);
+//     }
+
+//     if (flowControlState === 'end') {
+//       const currentIndex = this.getScopedVariable<number>('currentIndex');
+
+//       console.log('currentIndex', currentIndex);
+
+//       if (currentIndex < count) {
+//         this.gotoFlowControlIndex(0);
+//       } else {
+//         this.gotoFlowControlIndex(1);
+//       }
+
+//       this.setScopedVariable('currentIndex', currentIndex + 1);
+//     }
+//   }
+// }
+
+export class Conditional {
+  static identifier = "conditional";
+  static title = "Conditional";
+  static parameters = {
+    a: { type: ActionParameterType.String, defaultInput: true },
+    b: { type: ActionParameterType.String },
+    comparator: { type: ActionParameterType.String }
   }
 
-  getFlowControlState() {
-    console.log('getFlowControlState');
-  }
+  run({ a, b, comparator }) {
+    if (comparator === '>') {
+      return a > b;
+    }
 
-  setScopedVariable(name, value) {
-    console.log('setScopedVariable');
-  }
+    if (comparator === '<') {
+      return a < b;
+    }
 
-  getScopedVariable<T>(name, defaultValue): T  {
-    console.log('getScopedVariable');
-    return;
+    if (comparator === '<=') {
+      return a <= b;
+    }
+
+    if (comparator === '>=') {
+      return a >= b;
+    }
+
+    if (comparator === '=') {
+      return a === b;
+    }
+
+    if (comparator === 'contains') {
+      return a.includes(b);
+    }
+
+    if (comparator === 'doesNotContain') {
+      return !a.includes(b);
+    }
   }
 }
 
-export class RepeatTimes extends FlowControlAction {
+export class RepeatTimes {
   static identifier = "repeat_times";
   static title = "Repeat Times";
   static parameters = {
@@ -147,26 +219,17 @@ export class RepeatTimes extends FlowControlAction {
   }
 
   run({ count }) {
-    const flowControlState = this.getFlowControlState();
+    console.log('REPEAT_TIMES', count);
+  }
 
-    console.log('REPEAT_TIMES', flowControlState);
-
-    if (flowControlState === 'start') {
-      return this.setScopedVariable('currentIndex', 0);
+  getFlowControlIndex(state: string, { count }) {
+    if (state === 'start') {
+      return 0;
     }
 
-    if (flowControlState === 'end') {
-      const currentIndex = this.getScopedVariable<number>('currentIndex');
-
-      console.log('currentIndex', currentIndex);
-
-      if (currentIndex < count) {
-        this.gotoFlowControlIndex(0);
-      } else {
-        this.gotoFlowControlIndex(1);
-      }
-
-      this.setScopedVariable('currentIndex', currentIndex + 1);
+    if (state === 'end') {
+      return 0;
+      // return this.getScopedVariable('currentIndex') < count ? 0 : 1;
     }
   }
 }
