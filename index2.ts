@@ -11,7 +11,7 @@ import {
   Popup
 } from './actions2';
 
-import workflow from './workflow_5.json';
+import workflow from './workflow_6.json';
 
 interface SerializedAction {
   identifier: string;
@@ -74,14 +74,15 @@ function getDefaultParameters(parametersTemplate?: ActionParameters) {
 
 function replaceWithVariableValues(
   serializedParameters?: SerializedAction['parameters'],
-  variableStore: any
+  variableStore: any,
+  scope = 0
 ) {
   const parametersWithVariables = Object.keys(serializedParameters).reduce(
     (mem, parameterKey) => {
       const parameter = serializedParameters[parameterKey];
       const variableName = parameter?.uuid;
       const value = variableName
-        ? variableStore.getValue(variableName)
+        ? variableStore.getValue(variableName, scope)
         : parameter;
 
       mem[parameterKey] = value;
@@ -124,8 +125,8 @@ const FAKE_VARIABLE_STORE = {
   }
 };
 
-function withVariables(parameters: object) {
-  return replaceWithVariableValues(parameters, FAKE_VARIABLE_STORE);
+function withVariables(parameters: object, scope = 0) {
+  return replaceWithVariableValues(parameters, FAKE_VARIABLE_STORE, scope);
 }
 
 // TODO: May not be needed?
@@ -176,7 +177,7 @@ function runActionAtIndex(
     ...defaultParameters,
     ...serializedParameters,
     ...inputWithDefaultParameterName,
-  });
+  }, serializedAction.runtime.scope);
 
   // TODO: BEGIN THE CLEANEST BUT STILL HACKY CONTROL FLOW:
   // TODO: This feels crappy! But it's cleaner than before.
@@ -247,6 +248,8 @@ function createActionsIterator(actions: SerializedAction[]) {
     if (iterations > 100) {
       throw new Error('infinite loop');
     }
+
+    console.log(JSON.parse(JSON.stringify(FAKE_VARIABLE_STORE.storage)));
 
     const jumpIndex = jumps.findIndex((jump) => {
       return jump[0] === index;

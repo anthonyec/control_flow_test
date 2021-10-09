@@ -5,6 +5,19 @@
   "config": {},
   "actions": [
     {
+      "identifier": "insert_css",
+      "parameters": {
+        "css": ".new-element { background: green; } .new-element-2 { background: silver; }"
+      }
+    },
+    {
+      "identifier": "text_content",
+      "uuid": "id_1",
+      "parameters": {
+        "text": "Hello there"
+      }
+    },
+    {
       "identifier": "log",
       "parameters": {
         "message": "Start"
@@ -15,13 +28,20 @@
       "flowControl": "start",
       "flowControlGroup": "A",
       "parameters": {
-        "count": 3
+        "count": 5
       }
     },
     {
       "identifier": "log",
       "parameters": {
         "message": "FIRST LOOP"
+      }
+    },
+    {
+      "identifier": "create_element",
+      "parameters": {
+        "text": { "uuid": "currentIndex" },
+        "className": "new-element"
       }
     },
     {
@@ -41,6 +61,13 @@
       "identifier": "log",
       "parameters": {
         "message": "SECOND LOOP"
+      }
+    },
+    {
+      "identifier": "create_element",
+      "parameters": {
+        "text": { "uuid": "currentIndex" },
+        "className": "new-element-2"
       }
     },
     {
