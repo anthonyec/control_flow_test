@@ -253,8 +253,10 @@ export class RepeatTimes {
     count: { type: ActionParameterType.Number },
   }
 
-  run({ count }) {
+  run({ count }, group) {
     const currentIndex = this.getVariable('currentIndex', 0);
+
+    console.log('REPEAT_TIMES:', group, currentIndex);
 
     if (currentIndex < count - 1) {
       this.setVariable('currentIndex', currentIndex + 1);

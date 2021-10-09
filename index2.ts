@@ -98,16 +98,30 @@ const FAKE_VARIABLE_STORE = {
   storage: {},
 
   hasValue(key, scope = 0) {
-    return !!this.storage[`${scope}:${key}`];
+    if (!this.storage[scope]) {
+      return false;
+    }
+
+    return !!this.storage[scope][key];
   },
 
   setValue(key, value, scope = 0) {
-    this.storage[`${scope}:${key}`] = { value };
+    if (!this.storage[scope]) {
+      this.storage[scope] = {};
+    }
+
+    this.storage[scope][key] = value;
   },
 
   getValue(key, scope = 0) {
-    return this.storage[`${scope}:${key}`].value;
+    if (this.storage[scope]) {
+      return this.storage[scope][key];
+    }
   },
+
+  deleteScope(scope) {
+    delete this.storage[scope];
+  }
 };
 
 function withVariables(parameters: object) {
@@ -175,17 +189,20 @@ function runActionAtIndex(
     actionInstance.getVariable = (key, defaultValue) => {
       if (!FAKE_VARIABLE_STORE.hasValue(key, serializedAction.runtime.scope)) {
         FAKE_VARIABLE_STORE.setValue(key, defaultValue, serializedAction.runtime.scope);
+
         return defaultValue;
       }
 
-      return FAKE_VARIABLE_STORE.getValue(key, serializedAction.runtime.scope);
+      const value = FAKE_VARIABLE_STORE.getValue(key, serializedAction.runtime.scope);
+
+      return value;
     };
 
     actionInstance.setVariable = (key, value) => {
       FAKE_VARIABLE_STORE.setValue(key, value, serializedAction.runtime.scope);
     }
 
-    actionInstance.goto = (index: number, enableJump: boolean) => {
+    actionInstance.goto = (index: number) => {
       flowControlGotoIndex = flowControlGroupActions[index].runtime.index + 1;
 
       jump = [
@@ -203,7 +220,11 @@ function runActionAtIndex(
   }
   // END CONTROL FLOW.
 
-  const output = actionInstance.run(runParameters);
+  if (serializedAction.flowControl === 'middle' || serializedAction.flowControl === 'end') {
+    return { output: null, index: index + 1 };
+  }
+
+  const output = actionInstance.run(runParameters, serializedAction.flowControlGroup);
   const nextIndex = flowControlGotoIndex ? flowControlGotoIndex : index + 1;
 
   return { output, index: nextIndex, jump };
@@ -216,6 +237,7 @@ function createActionsIterator(actions: SerializedAction[]) {
   let iterations = 0;
   let iterationOutput = null;
   let jumps = [];
+  let previousScope = 0;
 
   return () => {
     if (index > actions.length - 1) {
@@ -243,6 +265,10 @@ function createActionsIterator(actions: SerializedAction[]) {
       FAKE_VARIABLE_STORE.setValue(variableUUID, results.output, actions[index].runtime.scope);
     }
 
+    if (currentAction.runtime.scope < previousScope) {
+      FAKE_VARIABLE_STORE.deleteScope(previousScope);
+    }
+
     // TODO: Should I keep jumps? Seems might be hacky but also enable if
     // statements and loops.
     if (results.jump) {
@@ -251,9 +277,10 @@ function createActionsIterator(actions: SerializedAction[]) {
 
     iterationOutput = results.output;
     index = results.index;
+    previousScope = currentAction.runtime.scope;
     iterations += 1;
 
-    return { id: currentAction.identifier, index, scope: currentAction.runtime.scope, output: iterationOutput };
+    return { id: currentAction.identifier, index: currentAction.runtime.index, nextIndex: index, scope: currentAction.runtime.scope, group: currentAction.flowControl, jump: results.jump?.join(), output: iterationOutput };
   };
 }
 

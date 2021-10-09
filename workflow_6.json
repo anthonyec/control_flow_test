@@ -5,41 +5,47 @@
   "config": {},
   "actions": [
     {
+      "identifier": "log",
+      "parameters": {
+        "message": "Start"
+      }
+    },
+    {
       "identifier": "repeat_times",
       "flowControl": "start",
+      "flowControlGroup": "A",
+      "parameters": {
+        "count": 3
+      }
+    },
+    {
+      "identifier": "log",
+      "parameters": {
+        "message": "FIRST LOOP"
+      }
+    },
+    {
+      "identifier": "repeat_times",
       "flowControlGroup": "A",
-      "parameters": {
-        "count": 2
-      }
-    },
-    {
-      "identifier": "log",
-      "parameters": {
-        "message": "OUTER LOOP"
-      }
-    },
-    {
-      "identifier": "repeat_times",
-      "flowControl": "start",
-      "flowControlGroup": "B",
-      "parameters": {
-        "count": 2
-      }
-    },
-    {
-      "identifier": "log",
-      "parameters": {
-        "message": "INNER LOOP"
-      }
-    },
-    {
-      "identifier": "repeat_times",
-      "flowControlGroup": "B",
       "flowControl": "end"
     },
     {
       "identifier": "repeat_times",
-      "flowControlGroup": "A",
+      "flowControl": "start",
+      "flowControlGroup": "B",
+      "parameters": {
+        "count": 3
+      }
+    },
+    {
+      "identifier": "log",
+      "parameters": {
+        "message": "SECOND LOOP"
+      }
+    },
+    {
+      "identifier": "repeat_times",
+      "flowControlGroup": "B",
       "flowControl": "end"
     },
     {
