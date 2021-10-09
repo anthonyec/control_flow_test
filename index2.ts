@@ -160,19 +160,34 @@ function runActionAtIndex(
     ...inputWithDefaultParameterName,
   });
 
+  // TODO: BEGIN THE CLEANEST BUT STILL HACKY CONTROL FLOW:
   // TODO: This feels crappy! But it's cleaner than before.
   const flowControlGroupActions = getControlFlowGroup(actions, serializedAction.flowControlGroup);
 
   let flowControlGotoIndex;
+  let jump = null;
 
   actionInstance.goto = (index: number) => {
     flowControlGotoIndex = flowControlGroupActions[index].runtime.index + 1;
+
+    jump = [
+      flowControlGroupActions[index + 1].runtime.index,
+      flowControlGroupActions[flowControlGroupActions.length - 1].runtime.index + 1
+    ];
   };
+
+  actionInstance.jump = (when: number, goto: number) => {
+    jump = [
+      flowControlGroupActions[when].runtime.index,
+      flowControlGroupActions[goto].runtime.index
+    ];
+  }
+  // END CONTROL FLOW.
 
   const output = actionInstance.run(runParameters);
   const nextIndex = flowControlGotoIndex ? flowControlGotoIndex : index + 1;
 
-  return { output, index: nextIndex };
+  return { output, index: nextIndex, jump };
 }
 
 const workflowFile = workflow as WorkflowFile;
@@ -181,6 +196,7 @@ function createActionsIterator(actions: SerializedAction[]) {
   let index = 0;
   let iterations = 0;
   let iterationOutput = null;
+  let jumps = [];
 
   return () => {
     if (index > actions.length - 1) {
@@ -191,12 +207,26 @@ function createActionsIterator(actions: SerializedAction[]) {
       throw new Error('infinite loop');
     }
 
+    const jumpIndex = jumps.findIndex((jump) => {
+      return jump[0] === index;
+    });
+
+    if (jumpIndex !== -1) {
+      index = jumps[jumpIndex][1];
+    }
+
     const currentAction = actions[index];
     const variableUUID = currentAction.uuid;
     const results = runActionAtIndex(actions, index, iterationOutput);
 
     if (variableUUID) {
       FAKE_VARIABLE_STORE.setValue(variableUUID, results.output, actions[index].runtime.scope);
+    }
+
+    // TODO: Should I keep jumps? Seems might be hacky but also enable if
+    // statements and loops.
+    if (results.jump) {
+      jumps.push(results.jump);
     }
 
     iterationOutput = results.output;

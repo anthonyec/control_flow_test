@@ -201,7 +201,7 @@ export class Conditional {
     comparator: { type: ActionParameterType.String }
   }
 
-  run({ a, b, comparator }) {
+  run({ a, b, comparator }, state: string) {
     let output = false;
 
     if (comparator === '>') {
@@ -231,6 +231,8 @@ export class Conditional {
     if (comparator === 'doesNotContain') {
       output = !a.includes(b);
     }
+
+    console.log('CONDITIONAL:', a, comparator, b, '=', output);
 
     if (output) {
       this.goto(0);

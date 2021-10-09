@@ -17,7 +17,18 @@
     {
       "identifier": "log",
       "parameters": {
-        "message": "Should see me!"
+        "message": "TRUE IF"
+      }
+    },
+    {
+      "identifier": "conditional",
+      "flowControlGroup": "A",
+      "flowControl": "middle"
+    },
+    {
+      "identifier": "log",
+      "parameters": {
+        "message": "FALSE ELSE"
       }
     },
     {
