@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "title": "Simple example",
+  "author": "",
+  "config": {},
+  "actions": [
+    {
+      "identifier": "repeat_times",
+      "flowControl": "start",
+      "flowControlGroup": "A",
+      "parameters": {
+        "count": 2
+      }
+    },
+    {
+      "identifier": "log",
+      "parameters": {
+        "message": "LOOPY!"
+      }
+    },
+    {
+      "identifier": "repeat_times",
+      "flowControl": "start",
+      "flowControlGroup": "B",
+      "parameters": {
+        "count": 2
+      }
+    },
+    {
+      "identifier": "log",
+      "parameters": {
+        "message": "INNER LOOPY!"
+      }
+    },
+    {
+      "identifier": "create_element",
+      "parameters": {
+        "className": "new-element",
+        "text": "LOL"
+      }
+    },
+    {
+      "identifier": "repeat_times",
+      "flowControlGroup": "B",
+      "flowControl": "end"
+    },
+    {
+      "identifier": "repeat_times",
+      "flowControlGroup": "A",
+      "flowControl": "end"
+    },
+    {
+      "identifier": "log",
+      "parameters": {
+        "message": "Done"
+      }
+    }
+  ]
+}

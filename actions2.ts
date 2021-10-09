@@ -2,6 +2,7 @@ enum ActionParameterType {
   String = 'string',
   DOMElement = 'DOMElement',
   Number = 'DOMElement',
+  Boolean = 'boolean'
 }
 
 export interface ActionParameters {
@@ -198,10 +199,11 @@ export class Conditional {
   static parameters = {
     a: { type: ActionParameterType.String, defaultInput: true },
     b: { type: ActionParameterType.String },
-    comparator: { type: ActionParameterType.String }
+    comparator: { type: ActionParameterType.String },
+    useElse: { type: ActionParameterType.Boolean }
   }
 
-  run({ a, b, comparator }, state: string) {
+  run({ a, b, comparator, useElse }, state: string) {
     let output = false;
 
     if (comparator === '>') {
@@ -252,17 +254,13 @@ export class RepeatTimes {
   }
 
   run({ count }) {
-    console.log('REPEAT_TIMES', count);
-  }
+    const currentIndex = this.getVariable('currentIndex', 0);
 
-  getFlowControlIndex(state: string, { count }) {
-    if (state === 'start') {
-      return 0;
+    if (currentIndex < count - 1) {
+      this.setVariable('currentIndex', currentIndex + 1);
+      this.jump(1, 0);
     }
 
-    if (state === 'end') {
-      return 0;
-      // return this.getScopedVariable('currentIndex') < count ? 0 : 1;
-    }
+    return null;
   }
 }

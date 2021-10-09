@@ -11,7 +11,7 @@ import {
   Popup
 } from './actions2';
 
-import workflow from './workflow_4.json';
+import workflow from './workflow_5.json';
 
 interface SerializedAction {
   identifier: string;
@@ -97,12 +97,16 @@ function replaceWithVariableValues(
 const FAKE_VARIABLE_STORE = {
   storage: {},
 
+  hasValue(key, scope = 0) {
+    return !!this.storage[`${scope}:${key}`];
+  },
+
   setValue(key, value, scope = 0) {
-    this.storage[key] = { value, scope };
+    this.storage[`${scope}:${key}`] = { value };
   },
 
   getValue(key, scope = 0) {
-    return this.storage[key].value;
+    return this.storage[`${scope}:${key}`].value;
   },
 };
 
@@ -167,20 +171,35 @@ function runActionAtIndex(
   let flowControlGotoIndex;
   let jump = null;
 
-  actionInstance.goto = (index: number) => {
-    flowControlGotoIndex = flowControlGroupActions[index].runtime.index + 1;
+  if (serializedAction.flowControl) {
+    actionInstance.getVariable = (key, defaultValue) => {
+      if (!FAKE_VARIABLE_STORE.hasValue(key, serializedAction.runtime.scope)) {
+        FAKE_VARIABLE_STORE.setValue(key, defaultValue, serializedAction.runtime.scope);
+        return defaultValue;
+      }
 
-    jump = [
-      flowControlGroupActions[index + 1].runtime.index,
-      flowControlGroupActions[flowControlGroupActions.length - 1].runtime.index + 1
-    ];
-  };
+      return FAKE_VARIABLE_STORE.getValue(key, serializedAction.runtime.scope);
+    };
 
-  actionInstance.jump = (when: number, goto: number) => {
-    jump = [
-      flowControlGroupActions[when].runtime.index,
-      flowControlGroupActions[goto].runtime.index
-    ];
+    actionInstance.setVariable = (key, value) => {
+      FAKE_VARIABLE_STORE.setValue(key, value, serializedAction.runtime.scope);
+    }
+
+    actionInstance.goto = (index: number, enableJump: boolean) => {
+      flowControlGotoIndex = flowControlGroupActions[index].runtime.index + 1;
+
+      jump = [
+        flowControlGroupActions[index + 1].runtime.index,
+        flowControlGroupActions[flowControlGroupActions.length - 1].runtime.index + 1
+      ];
+    };
+
+    actionInstance.jump = (when: number, goto: number) => {
+      jump = [
+        flowControlGroupActions[when].runtime.index,
+        flowControlGroupActions[goto].runtime.index
+      ];
+    }
   }
   // END CONTROL FLOW.
 
@@ -213,6 +232,7 @@ function createActionsIterator(actions: SerializedAction[]) {
 
     if (jumpIndex !== -1) {
       index = jumps[jumpIndex][1];
+      jumps.splice(jumpIndex);
     }
 
     const currentAction = actions[index];
